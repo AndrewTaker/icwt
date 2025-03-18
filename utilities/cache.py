@@ -34,3 +34,6 @@ class Cache:
 
     def clear(self):
         self.cache.clear()
+
+    def p(self):
+        print(self.cache)
