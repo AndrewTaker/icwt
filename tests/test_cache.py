@@ -1,4 +1,4 @@
-from utilities import cache
+from app.utilities import cache
 import pytest
 
 MAX_SIZE: int = 100
