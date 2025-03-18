@@ -9,7 +9,6 @@ ENTRIES: list[cache.Entry] = [cache.Entry(f"{i:0>3d}") for i in range(10)]
 def cache_fixtures():
     c = cache.Cache(max_size=MAX_SIZE, ttl=TTL)
     [c.set(str(i.value), i) for i in ENTRIES]
-    c.p()
     return c
 
 def test_cache_initialization(cache_fixtures: cache.Cache):
@@ -33,3 +32,13 @@ def test_cache_setter(cache_fixtures: cache.Cache):
     assert c.get("test_list_value") == [1, 2, 3]
     assert c.get("test_dictionary_value") == {"1": 1, "2": 2}
 
+def test_cache_deleter(cache_fixtures: cache.Cache):
+    c = cache_fixtures
+    c.delete("001")
+    assert c.get("001") == None
+    assert c.delete("non existing key") is None
+
+def test_cache_clearer(cache_fixtures: cache.Cache):
+    c = cache_fixtures
+    c.clear()
+    assert len(c.cache) == 0
