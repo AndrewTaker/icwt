@@ -1,6 +1,8 @@
+from psycopg2.extras import RealDictCursor, RealDictRow
+
 from app.database import get_db_connection
 from app.models.schemas import ProductCreate, ProductResponse, ProductUpdate
-from psycopg2.extras import RealDictCursor, RealDictRow
+
 
 class ProductService:
     @staticmethod
@@ -16,7 +18,8 @@ class ProductService:
         """
         with get_db_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query, (product_data.name, product_data.category_id, product_id))
+                cursor.execute(query, (product_data.name,
+                               product_data.category_id, product_id))
                 updated_product = cursor.fetchone()
                 conn.commit()
 
@@ -37,7 +40,8 @@ class ProductService:
         """
         with get_db_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query, (product_data.name, product_data.category_id))
+                cursor.execute(query, (product_data.name,
+                               product_data.category_id))
                 new_product = cursor.fetchone()
                 conn.commit()
 

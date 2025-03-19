@@ -8,7 +8,10 @@ PSQL_CONFIG = {
     'port': os.getenv("PSQL_PORT", 5432),
 }
 
+
 class Config:
     DEBUG = True
     SECRET_KEY = 'test'
-    DATABASE_URL = "dbname={dbname} user={user} password={password} host={host} port={port}".format(**PSQL_CONFIG)
+    DATABASE_URL = "dbname={dbname} user={user} password={password} host={host} port={port}".format(
+        **PSQL_CONFIG
+    )

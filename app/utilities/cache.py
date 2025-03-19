@@ -1,7 +1,8 @@
 import time
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
-from collections import OrderedDict
+
 
 @dataclass
 class Entry:
@@ -42,7 +43,7 @@ class Cache:
 
     def clear(self):
         self.cache.clear()
-    
+
     def _cleanup(self):
         current_time = int(time.time())
         expired_keys = [
