@@ -84,7 +84,6 @@ class ProductService:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(query, (limit, offset))
                 products = cursor.fetchall()
-                print('\n'.join(p for p in products[0]))
 
                 if not products:
                     raise ValueError("get_all_product err: Value Error")
