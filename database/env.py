@@ -1,67 +1,24 @@
-from logging.config import fileConfig
 import os
+from logging.config import fileConfig
 
 from alembic import context
-print(os.getcwd())
-PSQL_HOST: str | None = os.getenv("PSQL_HOST")
-PSQL_USER: str | None = os.getenv("PSQL_USER")
-PSQL_PASSWORD: str | None = os.getenv("PSQL_PASSWORD")
-PSQL_DB_NAME: str | None = os.getenv("PSQL_DB_NAME")
-# assert any([PSQL_DB_NAME, PSQL_HOST, PSQL_PASSWORD, PSQL_USER]) is None
-DSN: str = f"postgresql+psycopg2://{PSQL_USER}:{PSQL_PASSWORD}@{PSQL_HOST}/{PSQL_DB_NAME}"
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-config = context.config
+from sqlalchemy import create_engine, text
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+from app.config import Config as app_config
+
+# Database Connection URL
+DSN: str = "postgresql+psycopg2://{user}:{password}@{host}/{dbname}".format(
+    **app_config.PSQL_CONFIG
+)
+
+# Alembic Config
+config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = None
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-
-
-def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    
-    context.configure(
-        url=DSN,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    from sqlalchemy import create_engine
     connectable = create_engine(DSN)
 
     with connectable.connect() as connection:
@@ -69,11 +26,22 @@ def run_migrations_online() -> None:
             connection=connection, target_metadata=target_metadata
         )
 
-        with context.begin_transaction():
-            context.run_migrations()
+        migrations_directory = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'migrations')
+        )
+        done_dicrectory = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'migrations', 'done')
+        )
 
+        with connection.begin():
+            for file in sorted(os.listdir(migrations_directory)):
+                if file.endswith('.sql') and file not in os.listdir(done_dicrectory):
+                    sql_file_path = os.path.join(migrations_directory, file)
+                    with open(sql_file_path, 'r') as f:
+                        sql_script = f.read()
+                        connection.exec_driver_sql(sql_script)
+                        print(f"migrate -> {sql_file_path}")
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+            context.get_bind().commit()
+
+run_migrations_online()
