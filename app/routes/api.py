@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 
-from app.models.schemas import ProductCreate, ProductResponse
+from app.models.product import ProductCreate, ProductResponse
 from app.routes.errors import generic_error, validation_error
 from app.services.product_service import ProductService
 from app.utilities import cache
