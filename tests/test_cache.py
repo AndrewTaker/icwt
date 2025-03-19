@@ -1,12 +1,12 @@
 from app.utilities.cache import Cache, Entry
 import pytest
 
-MAX_SIZE: int = 100
+MAX_SIZE: int = 5
 TTL: int = 60
-ENTRIES: list[Entry] = [Entry(f"{i:0>3d}") for i in range(10)]
+ENTRIES: list[Entry] = [Entry(f"{i:0>3d}") for i in range(MAX_SIZE)]
 
 @pytest.fixture
-def cache_fixtures():
+def cache_fixtures() -> Cache:
     c = Cache(max_size=MAX_SIZE, ttl=TTL)
     [c.set(str(i.value), i) for i in ENTRIES]
     return c
@@ -42,3 +42,9 @@ def test_cache_clearer(cache_fixtures: Cache):
     c = cache_fixtures
     c.clear()
     assert len(c.cache) == 0
+
+def test_cache_fifo(cache_fixtures: Cache):
+    c = cache_fixtures
+    assert len(c.cache) == MAX_SIZE
+    c.set("new key", Entry(123))
+    assert c.get("000") is None
