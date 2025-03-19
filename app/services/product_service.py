@@ -1,7 +1,7 @@
-from psycopg2.extras import RealDictCursor, RealDictRow
+from psycopg2.extras import RealDictCursor
 
 from app.database import get_db_connection
-from app.models.schemas import ProductCreate, ProductResponse, ProductUpdate
+from app.models.product import ProductCreate
 
 
 class ProductService:
@@ -71,21 +71,24 @@ class ProductService:
         return product
 
     @staticmethod
-    def get_all_products():
+    def get_all_products(limit: int, offset: int):
         """
         Retrieve all products using raw SQL.
         """
         query = """
         SELECT id, name, category_id
-        FROM product;
+        FROM product
+        LIMIT %s OFFSET %s;
         """
         with get_db_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, (limit, offset))
                 products = cursor.fetchall()
+                print('\n'.join(p for p in products[0]))
 
                 if not products:
                     raise ValueError("get_all_product err: Value Error")
+
         return products
 
     @staticmethod

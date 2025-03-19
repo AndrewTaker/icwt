@@ -10,7 +10,7 @@ from app.utilities import cache
 from app.utilities.cache import Entry
 
 api_v1_blueprint = Blueprint('api/v1', __name__)
-
+MAX_QUERY_RESULTS: int = 100
 
 @api_v1_blueprint.route('/products', methods=['POST'])
 def create_product():
@@ -44,18 +44,22 @@ def get_product(product_id: int):
 
 @api_v1_blueprint.route('/products', methods=['GET'])
 def get_all_products():
-    cache_key = "products"
+    limit = request.args.get('limit', default=50, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+    cache_key = f"products:l{limit}:o{offset}"
+
+    if limit > MAX_QUERY_RESULTS: limit = MAX_QUERY_RESULTS
     try:
         cached = cache.get(cache_key)
         if cached:
             products = cached
         else:
-            products = ProductService.get_all_products()
+            products = ProductService.get_all_products(limit, offset)
             cache.set(cache_key, Entry(products))
         return (
             jsonify({
-                "limit": 0,
-                "offset": 0,
+                "limit": limit,
+                "offset": offset,
                 "data": [ProductResponse(**product).model_dump() for product in products]
             }),
             HTTPStatus.OK
