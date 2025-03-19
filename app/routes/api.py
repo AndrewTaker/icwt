@@ -9,7 +9,7 @@ from app.services.product_service import ProductService
 from app.utilities import cache
 from app.utilities.cache import Entry
 
-api_v1_blueprint = Blueprint('api/v1', __name__)
+api_v1_blueprint = Blueprint('api_v1', __name__)
 MAX_QUERY_RESULTS: int = 100
 
 @api_v1_blueprint.route('/products', methods=['POST'])
