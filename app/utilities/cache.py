@@ -52,16 +52,3 @@ class Cache:
         ]
         for key in expired_keys:
             del self.cache[key]
-
-# def qq():
-#     c = Cache(5, 2)
-#     e = Entry([1,2,])
-#     for i in range(30):
-#         c.set("qq", e)
-#         c.get("qq")
-#         if i == 10 or i == 15:
-#             c.set("qq", Entry([1,2,3,4,5]))
-#         print(i, c.cache)
-#         time.sleep(1)
-#
-# qq()
