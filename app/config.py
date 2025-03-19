@@ -12,6 +12,7 @@ PSQL_CONFIG = {
 class Config:
     DEBUG = True
     SECRET_KEY = 'test'
+    PSQL_CONFIG = PSQL_CONFIG
     DATABASE_URL = "dbname={dbname} user={user} password={password} host={host} port={port}".format(
         **PSQL_CONFIG
     )
