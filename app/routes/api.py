@@ -80,7 +80,7 @@ def get_all_products():
         return generic_error()
 
 
-@products_blueprint.route("<int:product_id>", methods=["PUT"])
+@products_blueprint.route("/<int:product_id>", methods=["PUT"])
 def full_update_product(product_id: int):
     try:
         product_update = ProductCreate(**request.get_json())
@@ -94,7 +94,7 @@ def full_update_product(product_id: int):
         return generic_error()
 
 
-@sales_blueprint.route("total", methods=["GET"])
+@sales_blueprint.route("/total", methods=["GET"])
 def get_total_sales():
     today = datetime.now().date()
     six_months_ago = today - timedelta(days=180)
@@ -129,7 +129,7 @@ def get_total_sales():
         return generic_error(e)
 
 
-@sales_blueprint.route("top-products", methods=["GET"])
+@sales_blueprint.route("/top-products", methods=["GET"])
 def get_top_n_products():
     today = datetime.now().date()
     six_months_ago = today - timedelta(days=180)
