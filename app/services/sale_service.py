@@ -1,4 +1,4 @@
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, RealDictRow
 
 from app.database import get_db_connection
 
@@ -10,18 +10,16 @@ class SaleService:
         Retrieve all products using raw SQL.
         """
         query = """
-        SELECT product.name, sum(sale.quantity) AS sold
-        FROM product
-        WHERE sale.sale_date BETWEEN %s AND %s
-        JOIN sale ON sale.product_id = product.id
-        GROUP BY product.name
+        SELECT COALESCE(SUM(quantity), 0) AS total
+        FROM sale
+        WHERE sale_date BETWEEN %s AND %s
         """
         with get_db_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(query, (start_date, end_date))
-                products = cursor.fetchall()
+                total = cursor.fetchone()
 
-                if not products:
-                    raise ValueError("get_all_product err: Value Error")
+                if not total:
+                    raise(ValueError("get_total_for_period err: ValueError"))
 
-        return products
+                return total
