@@ -20,7 +20,7 @@ class SaleService:
                 total = cursor.fetchone()
 
                 if not total:
-                    raise(ValueError("get_total_for_period err: ValueError"))
+                    raise (ValueError("get_total_for_period err: ValueError"))
 
                 return total
 
@@ -31,7 +31,7 @@ class SaleService:
         """
 # select product.name, sale.quantity from product join sale on sale.product_id = product.id where sale.sale_date between '2023-10-01' and '2023-10-30' order by sale.quantity DESC limit 5;
         query = """
-        SELECT product.name, sale.quantity
+        SELECT product.name AS name, sale.quantity AS sold_amount
         FROM product
         JOIN sale ON sale.product_id = product.id
         WHERE sale_date BETWEEN %s AND %s
@@ -41,9 +41,10 @@ class SaleService:
         with get_db_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(query, (start_date, end_date, limit))
-                total = cursor.fetchone()
+                total = cursor.fetchall()
+                return total if total else []
 
-                if not total:
-                    raise(ValueError("get_total_for_period err: ValueError"))
+            if not total:
+               raise(ValueError("get_n_top_products err: ValueError"))
 
-                return total
+            return total
