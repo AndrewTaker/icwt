@@ -6,5 +6,4 @@ class SalesTotalResponse(BaseModel):
 class SalesTopProductsResponse(BaseModel):
     name: str
     sold_amount: int
-    sold_value: float
 
