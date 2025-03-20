@@ -84,7 +84,8 @@ def get_all_products():
 def full_update_product(product_id: int):
     try:
         product_update = ProductCreate(**request.get_json())
-        product = ProductService.full_update_product(product_id, product_update)
+        product = ProductService.full_update_product(
+            product_id, product_update)
         return jsonify(ProductResponse(**product).model_dump()), HTTPStatus.OK
     except ValidationError as e:
         print(e)
@@ -99,8 +100,10 @@ def get_total_sales():
     today = datetime.now().date()
     six_months_ago = today - timedelta(days=180)
 
-    start_date = request.args.get("start_date", default=six_months_ago.isoformat(), type=str)
-    end_date = request.args.get("end_date", default=today.isoformat(), type=str)
+    start_date = request.args.get(
+        "start_date", default=six_months_ago.isoformat(), type=str)
+    end_date = request.args.get(
+        "end_date", default=today.isoformat(), type=str)
 
     if datetime.fromisoformat(start_date) > datetime.fromisoformat(end_date):
         return date_range_error(start_date, end_date)
@@ -111,7 +114,8 @@ def get_total_sales():
         if cached:
             total_result = cached
         else:
-            total_result  = SaleService.get_total_for_period(start_date, end_date)
+            total_result = SaleService.get_total_for_period(
+                start_date, end_date)
             cache.set(cache_key, Entry(total_result))
         return (
             jsonify(
@@ -134,8 +138,10 @@ def get_top_n_products():
     today = datetime.now().date()
     six_months_ago = today - timedelta(days=180)
 
-    start_date = request.args.get("start_date", default=six_months_ago.isoformat(), type=str)
-    end_date = request.args.get("end_date", default=today.isoformat(), type=str)
+    start_date = request.args.get(
+        "start_date", default=six_months_ago.isoformat(), type=str)
+    end_date = request.args.get(
+        "end_date", default=today.isoformat(), type=str)
     limit = request.args.get("limit", default=10, type=int)
 
     if datetime.fromisoformat(start_date) > datetime.fromisoformat(end_date):
@@ -147,7 +153,8 @@ def get_top_n_products():
         if cached:
             total_result = cached
         else:
-            total_result  = SaleService.get_n_top_products(start_date, end_date, limit)
+            total_result = SaleService.get_n_top_products(
+                start_date, end_date, limit)
             cache.set(cache_key, Entry(total_result))
         return (
             jsonify(

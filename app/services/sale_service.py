@@ -45,6 +45,6 @@ class SaleService:
                 return total if total else []
 
             if not total:
-               raise(ValueError("get_n_top_products err: ValueError"))
+                raise (ValueError("get_n_top_products err: ValueError"))
 
             return total
