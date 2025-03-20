@@ -127,3 +127,43 @@ def get_total_sales():
         return validation_error(e)
     except Exception as e:
         return generic_error(e)
+
+
+@sales_blueprint.route("top-products", methods=["GET"])
+def get_top_n_products():
+    today = datetime.now().date()
+    six_months_ago = today - timedelta(days=180)
+
+    start_date = request.args.get("start_date", default=six_months_ago.isoformat(), type=str)
+    end_date = request.args.get("end_date", default=today.isoformat(), type=str)
+    limit = request.args.get("limit", default=10, type=int)
+
+    if datetime.fromisoformat(start_date) > datetime.fromisoformat(end_date):
+        return date_range_error(start_date, end_date)
+
+    cache_key = f"topnproducts:sd{start_date}:ed{end_date}:l{limit}"
+    try:
+        cached = cache.get(cache_key)
+        if cached:
+            total_result = cached
+        else:
+            total_result  = SaleService.get_n_top_products(start_date, end_date, limit)
+            cache.set(cache_key, Entry(total_result))
+        return (
+            jsonify(
+                {
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "limit": limit,
+                    "data": [
+                        SalesTopProductsResponse(**result).model_dump()
+                        for result in total_result
+                    ]
+                }
+            ),
+            HTTPStatus.OK,
+        )
+    except ValidationError as e:
+        return validation_error(e)
+    except Exception as e:
+        return generic_error(e)
