@@ -1,5 +1,6 @@
 import os
 from logging.config import fileConfig
+import shutil
 
 from alembic import context
 from sqlalchemy import create_engine, text
@@ -42,6 +43,7 @@ def run_migrations_online() -> None:
                     with open(sql_file_path, "r") as f:
                         sql_script = f.read()
                         connection.exec_driver_sql(sql_script)
+                        shutil.copy(sql_file_path, os.path.join(done_dicrectory, file))
                         print(f"migrate -> {sql_file_path}")
 
             context.get_bind().commit()
