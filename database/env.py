@@ -28,9 +28,12 @@ def run_migrations_online() -> None:
         migrations_directory = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "migrations")
         )
+        if not os.path.exists(migrations_directory): os.mkdir(migrations_directory)
+
         done_dicrectory = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "migrations", "done")
         )
+        if not os.path.exists(done_dicrectory): os.mkdir(done_dicrectory)
 
         with connection.begin():
             for file in sorted(os.listdir(migrations_directory)):
