@@ -21,6 +21,8 @@ MAX_QUERY_RESULTS: int = 100
 def delete_product(product_id: int):
     try:
         ProductService.delete_product(product_id)
+        cache_key = f"products:{product_id}"
+        cache.delete(cache_key)
         return "", HTTPStatus.NO_CONTENT
     except ValidationError as e:
         return validation_error(e)
