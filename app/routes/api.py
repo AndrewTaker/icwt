@@ -4,8 +4,10 @@ from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 
 from app.models.product import ProductCreate, ProductResponse
+from app.models.sale import SalesTotalResponse, SalesTopProductsResponse
 from app.routes.errors import generic_error, validation_error
 from app.services.product_service import ProductService
+from app.services.sale_service import SaleService
 from app.utilities import cache
 from app.utilities.cache import Entry
 
@@ -88,4 +90,36 @@ def full_update_product(product_id: int):
         return validation_error(e)
     except Exception as e:
         print(e)
+        return generic_error()
+
+
+@sales_blueprint.route("/total", methods=["GET"])
+def get_total_sales():
+    start_date = request.args.get("start_date", default="", type=str)
+    end_date = request.args.get("end_date", default="", type=str)
+    cache_key = f"totalsales:sd{start_date}:ed{end_date}"
+
+    try:
+        cached = cache.get(cache_key)
+        if cached:
+            products = cached
+        else:
+            products = SaleService.get_total_for_period(start_date, end_date)
+            cache.set(cache_key, Entry(products))
+        return (
+            jsonify(
+                {
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "data": [
+                        SalesTotalResponse(**product).model_dump()
+                        for product in products
+                    ],
+                }
+            ),
+            HTTPStatus.OK,
+        )
+    except ValidationError as e:
+        return validation_error(e)
+    except Exception as e:
         return generic_error()
