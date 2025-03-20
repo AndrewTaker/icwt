@@ -1,10 +1,7 @@
 from pydantic import BaseModel
 
 class SalesTotalResponse(BaseModel):
-    name: str
-    sold_value: float
-    total_value: float
-
+    total: int
 
 class SalesTopProductsResponse(BaseModel):
     name: str
