@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
@@ -5,7 +6,7 @@ from pydantic import ValidationError
 
 from app.models.product import ProductCreate, ProductResponse
 from app.models.sale import SalesTotalResponse, SalesTopProductsResponse
-from app.routes.errors import generic_error, validation_error
+from app.routes.errors import date_range_error, generic_error, validation_error
 from app.services.product_service import ProductService
 from app.services.sale_service import SaleService
 from app.utilities import cache
@@ -16,7 +17,7 @@ sales_blueprint = Blueprint("sales", __name__)
 MAX_QUERY_RESULTS: int = 100
 
 
-@products_blueprint.route("/", methods=["POST"])
+@products_blueprint.route("", methods=["POST"])
 def create_product():
     try:
         product_data = ProductCreate(**request.get_json())
@@ -46,7 +47,7 @@ def get_product(product_id: int):
         return generic_error()
 
 
-@products_blueprint.route("/", methods=["GET"])
+@products_blueprint.route("", methods=["GET"])
 def get_all_products():
     limit = request.args.get("limit", default=50, type=int)
     offset = request.args.get("offset", default=0, type=int)
@@ -79,7 +80,7 @@ def get_all_products():
         return generic_error()
 
 
-@products_blueprint.route("/<int:product_id>", methods=["PUT"])
+@products_blueprint.route("<int:product_id>", methods=["PUT"])
 def full_update_product(product_id: int):
     try:
         product_update = ProductCreate(**request.get_json())
@@ -93,28 +94,31 @@ def full_update_product(product_id: int):
         return generic_error()
 
 
-@sales_blueprint.route("/total", methods=["GET"])
+@sales_blueprint.route("total", methods=["GET"])
 def get_total_sales():
-    start_date = request.args.get("start_date", default="", type=str)
-    end_date = request.args.get("end_date", default="", type=str)
-    cache_key = f"totalsales:sd{start_date}:ed{end_date}"
+    today = datetime.now().date()
+    six_months_ago = today - timedelta(days=180)
 
+    start_date = request.args.get("start_date", default=six_months_ago.isoformat(), type=str)
+    end_date = request.args.get("end_date", default=today.isoformat(), type=str)
+
+    if datetime.fromisoformat(start_date) > datetime.fromisoformat(end_date):
+        return date_range_error(start_date, end_date)
+
+    cache_key = f"totalsales:sd{start_date}:ed{end_date}"
     try:
         cached = cache.get(cache_key)
         if cached:
-            products = cached
+            total_result = cached
         else:
-            products = SaleService.get_total_for_period(start_date, end_date)
-            cache.set(cache_key, Entry(products))
+            total_result  = SaleService.get_total_for_period(start_date, end_date)
+            cache.set(cache_key, Entry(total_result))
         return (
             jsonify(
                 {
                     "start_date": start_date,
                     "end_date": end_date,
-                    "data": [
-                        SalesTotalResponse(**product).model_dump()
-                        for product in products
-                    ],
+                    **SalesTotalResponse(**total_result).model_dump(),
                 }
             ),
             HTTPStatus.OK,
@@ -122,4 +126,4 @@ def get_total_sales():
     except ValidationError as e:
         return validation_error(e)
     except Exception as e:
-        return generic_error()
+        return generic_error(e)
