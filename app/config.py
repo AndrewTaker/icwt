@@ -11,7 +11,7 @@ PSQL_CONFIG = {
 
 class Config:
     DEBUG = True
-    SECRET_KEY = 'test'
+    SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
     PSQL_CONFIG = PSQL_CONFIG
     DATABASE_URL = "dbname={dbname} user={user} password={password} host={host} port={port}".format(
         **PSQL_CONFIG
