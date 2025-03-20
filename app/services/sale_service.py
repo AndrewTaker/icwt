@@ -1,4 +1,4 @@
-from psycopg2.extras import RealDictCursor, RealDictRow
+from psycopg2.extras import RealDictCursor
 
 from app.database import get_db_connection
 
@@ -6,9 +6,6 @@ from app.database import get_db_connection
 class SaleService:
     @staticmethod
     def get_total_for_period(start_date: str, end_date: str):
-        """
-        Retrieve all products using raw SQL.
-        """
         query = """
         SELECT COALESCE(SUM(quantity), 0) AS total
         FROM sale
@@ -26,10 +23,6 @@ class SaleService:
 
     @staticmethod
     def get_n_top_products(start_date: str, end_date: str, limit: int):
-        """
-        Retrieve all products using raw SQL.
-        """
-# select product.name, sale.quantity from product join sale on sale.product_id = product.id where sale.sale_date between '2023-10-01' and '2023-10-30' order by sale.quantity DESC limit 5;
         query = """
         SELECT product.name AS name, sale.quantity AS sold_amount
         FROM product
@@ -43,8 +36,3 @@ class SaleService:
                 cursor.execute(query, (start_date, end_date, limit))
                 total = cursor.fetchall()
                 return total if total else []
-
-            if not total:
-                raise (ValueError("get_n_top_products err: ValueError"))
-
-            return total

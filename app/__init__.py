@@ -1,4 +1,5 @@
-from flask import Flask, Blueprint
+from flask import Blueprint, Flask
+
 from app.routes.api import products_blueprint, sales_blueprint
 
 

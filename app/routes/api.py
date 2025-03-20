@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 
 from app.models.product import ProductCreate, ProductResponse
-from app.models.sale import SalesTotalResponse, SalesTopProductsResponse
+from app.models.sale import SalesTopProductsResponse, SalesTotalResponse
 from app.routes.errors import date_range_error, generic_error, validation_error
 from app.services.product_service import ProductService
 from app.services.sale_service import SaleService
@@ -15,6 +15,17 @@ from app.utilities.cache import Entry
 products_blueprint = Blueprint("products", __name__)
 sales_blueprint = Blueprint("sales", __name__)
 MAX_QUERY_RESULTS: int = 100
+
+
+@products_blueprint.route("/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id: int):
+    try:
+        ProductService.delete_product(product_id)
+        return "", HTTPStatus.NO_CONTENT
+    except ValidationError as e:
+        return validation_error(e)
+    except Exception as e:
+        return generic_error()
 
 
 @products_blueprint.route("", methods=["POST"])

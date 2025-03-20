@@ -7,9 +7,6 @@ from app.models.product import ProductCreate
 class ProductService:
     @staticmethod
     def full_update_product(product_id: int, product_data: ProductCreate):
-        """
-        Create a new product using raw SQL.
-        """
         query = """
         UPDATE product
         SET name = %s, category_id = %s
@@ -30,9 +27,6 @@ class ProductService:
 
     @staticmethod
     def create_product(product_data: ProductCreate):
-        """
-        Create a new product using raw SQL.
-        """
         query = """
         INSERT INTO product (name, category_id)
         VALUES (%s, %s)
@@ -52,9 +46,6 @@ class ProductService:
 
     @staticmethod
     def get_product(product_id: int):
-        """
-        Retrieve a product by its ID using raw SQL.
-        """
         query = """
         SELECT id, name, category_id
         FROM product
@@ -72,9 +63,6 @@ class ProductService:
 
     @staticmethod
     def get_all_products(limit: int, offset: int):
-        """
-        Retrieve all products using raw SQL.
-        """
         query = """
         SELECT id, name, category_id
         FROM product
@@ -92,9 +80,6 @@ class ProductService:
 
     @staticmethod
     def delete_product(product_id: int):
-        """
-        Delete a product using raw SQL.
-        """
         query = """
         DELETE FROM product
         WHERE id = %s;
@@ -103,5 +88,3 @@ class ProductService:
             with conn.cursor() as cursor:
                 cursor.execute(query, (product_id,))
                 conn.commit()
-
-        return {"message": "Product deleted successfully"}
